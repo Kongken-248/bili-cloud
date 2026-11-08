@@ -68,7 +68,9 @@ jobs:
     needs: prep
     if: ${{ github.event.inputs.mode != 'snapshot' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 实测 25.2 分钟（256 个新视频 × 3 请求 + 24 次 newlist）。原来是 30 分钟，
+    # 余量只剩 5 分钟，新视频一多就会踩线，放宽到 45。
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
