@@ -1,0 +1,71 @@
+{
+ "batch": "2026-11-08 14:30",
+ "mode": "snapshot",
+ "shard": 0,
+ "total": 4,
+ "generated_at": "2026-11-08 14:24",
+ "requests": 5,
+ "snapshots": [
+  {
+   "bvid": "BV11A4W6kEVb",
+   "view": 28,
+   "like": 3,
+   "coin": 0,
+   "fav": 0,
+   "share": 0,
+   "reply": 0,
+   "danmaku": 0,
+   "his_rank": 0,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV11WZxYvE35",
+   "view": 1696683,
+   "like": 171472,
+   "coin": 2343,
+   "fav": 20447,
+   "share": 1748,
+   "reply": 1154,
+   "danmaku": 575,
+   "his_rank": 0,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV11mZBYqEDT",
+   "view": 237958,
+   "like": 16575,
+   "coin": 917,
+   "fav": 7271,
+   "share": 435,
+   "reply": 318,
+   "danmaku": 176,
+   "his_rank": 0,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV127ZvYhEHb",
+   "view": 2352269,
+   "like": 234275,
+   "coin": 94712,
+   "fav": 86919,
+   "share": 20451,
+   "reply": 1978,
+   "danmaku": 888,
+   "his_rank": 73,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV12DZ6YVEkB",
+   "view": 5379216,
+   "like": 30242,
+   "coin": 24526,
+   "fav": 307985,
+   "share": 7,
+   "reply": 36,
+   "danmaku": 85,
+   "his_rank": 46,
+   "now_rank": 0
+  }
+ ],
+ "failed": []
+}

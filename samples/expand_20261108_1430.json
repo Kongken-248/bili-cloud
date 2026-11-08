@@ -1,0 +1,201 @@
+{
+ "batch": "2026-11-08 14:30",
+ "mode": "expand",
+ "shard": 0,
+ "total": 1,
+ "generated_at": "2026-11-08 15:11",
+ "requests": 33,
+ "videos": [
+  {
+   "bvid": "BV1HhW76EEi4",
+   "aid": 117579561568599,
+   "cid": 43431038324,
+   "title": "好哥哥...",
+   "descr": "-",
+   "pubdate": 1794121852,
+   "duration": 16,
+   "tid": 27,
+   "tid_v2": 2041,
+   "tname": "",
+   "width": 1080,
+   "height": 1440,
+   "videos_cnt": 1,
+   "copyright": 1,
+   "owner_mid": 3707022799277025,
+   "owner_name": "莳霍"
+  },
+  {
+   "bvid": "BV1NPWE6dEW9",
+   "aid": 117579528014997,
+   "cid": 43430907088,
+   "title": "一场回家过年的风波，让一家人重新学着体谅与担当，苏晓守住了自己的心愿，她不再是谁家的附属，她是那个父亲盼了五年的女儿",
+   "descr": "",
+   "pubdate": 1794121848,
+   "duration": 2728,
+   "tid": 27,
+   "tid_v2": 2005,
+   "tname": "",
+   "width": 1920,
+   "height": 1080,
+   "videos_cnt": 1,
+   "copyright": 1,
+   "owner_mid": 3747562337078249,
+   "owner_name": "雾中千章"
+  },
+  {
+   "bvid": "BV1ChW76EEVs",
+   "aid": 117579561637977,
+   "cid": 43431101432,
+   "title": "“Oh baby don't cry 不用猜疑我给你的爱～”",
+   "descr": "-",
+   "pubdate": 1794121845,
+   "duration": 18,
+   "tid": 27,
+   "tid_v2": 0,
+   "tname": "",
+   "width": 1532,
+   "height": 1080,
+   "videos_cnt": 1,
+   "copyright": 1,
+   "owner_mid": 484775156,
+   "owner_name": "雨初awa"
+  }
+ ],
+ "tags": {
+  "BV1HhW76EEi4": [
+   {
+    "tag_id": 8990,
+    "tag_name": "剪辑",
+    "type": 3
+   },
+   {
+    "tag_id": 107324086,
+    "tag_name": "李天辰  李天希",
+    "type": 1
+   },
+   {
+    "tag_id": 17291794,
+    "tag_name": "时光代理人",
+    "type": 0
+   }
+  ],
+  "BV1NPWE6dEW9": [
+   {
+    "tag_id": 42255,
+    "tag_name": "家庭",
+    "type": 3
+   },
+   {
+    "tag_id": 66605,
+    "tag_name": "情感",
+    "type": 3
+   },
+   {
+    "tag_id": 209268,
+    "tag_name": "婚姻",
+    "type": 0
+   }
+  ],
+  "BV1ChW76EEVs": [
+   {
+    "tag_id": 1907,
+    "tag_name": "二次元",
+    "type": 3
+   },
+   {
+    "tag_id": 499,
+    "tag_name": "音乐",
+    "type": 3
+   },
+   {
+    "tag_id": 15734527,
+    "tag_name": "蔚蓝档案",
+    "type": 1
+   },
+   {
+    "tag_id": 24962799,
+    "tag_name": "暗区突围农场",
+    "type": 1
+   }
+  ]
+ },
+ "uppers": {
+  "3707022799277025": {
+   "name": "莳霍",
+   "fans": 1,
+   "archive_count": 3
+  },
+  "3747562337078249": {
+   "name": "雾中千章",
+   "fans": 1,
+   "archive_count": 196
+  },
+  "484775156": {
+   "name": "雨初awa",
+   "fans": 5,
+   "archive_count": 2
+  }
+ },
+ "snapshots": [
+  {
+   "bvid": "BV1HhW76EEi4",
+   "view": 0,
+   "like": 0,
+   "coin": 0,
+   "fav": 0,
+   "share": 0,
+   "reply": 0,
+   "danmaku": 0,
+   "his_rank": 0,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV1NPWE6dEW9",
+   "view": 0,
+   "like": 0,
+   "coin": 0,
+   "fav": 0,
+   "share": 0,
+   "reply": 0,
+   "danmaku": 0,
+   "his_rank": 0,
+   "now_rank": 0
+  },
+  {
+   "bvid": "BV1ChW76EEVs",
+   "view": 0,
+   "like": 1,
+   "coin": 0,
+   "fav": 1,
+   "share": 0,
+   "reply": 0,
+   "danmaku": 0,
+   "his_rank": 0,
+   "now_rank": 0
+  }
+ ],
+ "candidates": [
+  {
+   "bvid": "BV1HhW76EEi4",
+   "rid": 1,
+   "source": "newlist",
+   "tid": 27,
+   "tname": "综合"
+  },
+  {
+   "bvid": "BV1NPWE6dEW9",
+   "rid": 1,
+   "source": "newlist",
+   "tid": 27,
+   "tname": "综合"
+  },
+  {
+   "bvid": "BV1ChW76EEVs",
+   "rid": 1,
+   "source": "newlist",
+   "tid": 27,
+   "tname": "综合"
+  }
+ ],
+ "failed": []
+}

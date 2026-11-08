@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+
+# out/ 是产出目录，必须提交（本地靠它合并），不要忽略。
+# 只忽略临时文件：
+out/*.tmp
