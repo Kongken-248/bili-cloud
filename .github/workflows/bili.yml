@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       limit:
-        description: '只跑前 N 个（dry-run 用，0 = 全部）'
+        description: '每个分片只跑前 N 个（dry-run 用，0 = 全部）'
         default: '0'
       mode:
         description: 'snapshot / expand / both'
