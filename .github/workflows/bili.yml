@@ -104,6 +104,7 @@ jobs:
           pattern: snap-*
           merge-multiple: true
           path: out
+        continue-on-error: true     # 分片全挂时没有产物，不能让 commit 步骤跟着报错
       - uses: actions/download-artifact@v4
         with:
           name: expand
@@ -119,7 +120,8 @@ jobs:
         run: |
           git config user.name  "bili-cloud-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add out data/bvids.json
+          mkdir -p out                     # 采集全挂时 out/ 不存在，git add 会直接报错
+          git add -A
           if git diff --cached --quiet; then
             echo "本轮无新数据"
             exit 0

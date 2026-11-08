@@ -1,10 +1,13 @@
-"""B 站公开接口最小客户端 —— 云端专用，全程不带 cookie。
+"""B 站公开接口最小客户端 —— 云端专用，全程不带 cookie（buvid3 例外，见下）。
 
 设计要点：
-1. 每个请求前 sleep（限速落在请求之前，不是之后），带随机抖动；
-2. 失败退避 5*2^n + 抖动；
-3. HTTP 412 / code -412 直接抛 Blocked —— 海外 IP 被拦就是被拦，不静默重试；
-4. 稿件不可见（-404/62002/62004/62012）当作"跳过"，不算错误。
+1. 首次请求前先取 buvid3：**没有 buvid3 的请求会被直接判 HTTP 412**（2026-11-08
+   在 GitHub runner 实测：裸请求 412，补上 buvid3 后 view/newlist 均 code=0，
+   与出口 IP 无关）。buvid3 由免登录的 finger/spi 接口发放，不是账号凭据；
+2. 每个请求前 sleep（限速落在请求之前，不是之后），带随机抖动；
+3. 失败退避 5*2^n + 抖动；
+4. 补了 buvid3 仍 412 / code -412 才抛 Blocked —— 那才是真的出口 IP 被风控；
+5. 稿件不可见（-404/62002/62004/62012）当作"跳过"，不算错误。
 """
 
 import random
@@ -36,8 +39,23 @@ class Client:
         self.delay = delay
         self.retries = retries
         self.requests = 0
+        self._buvid_done = False
+
+    def ensure_buvid3(self):
+        """取一次 buvid3/buvid4。spi 免登录、不消耗风控额度，失败也不阻断。"""
+        if self._buvid_done:
+            return
+        self._buvid_done = True
+        try:
+            d = (self.s.get(API + "/x/frontend/finger/spi", timeout=20).json() or {}).get("data") or {}
+        except (requests.RequestException, ValueError):
+            return
+        for key, name in (("b_3", "buvid3"), ("b_4", "buvid4")):
+            if d.get(key):
+                self.s.cookies.set(name, d[key], domain=".bilibili.com")
 
     def _get(self, path, params):
+        self.ensure_buvid3()
         last = None
         for attempt in range(self.retries):
             time.sleep(random.uniform(*self.delay))
@@ -52,7 +70,7 @@ class Client:
                 continue
 
             if r.status_code == 412:
-                raise Blocked("HTTP 412，请求被拦截（出口 IP 风控）")
+                raise Blocked("HTTP 412（已带 buvid3 仍被拦，判断为出口 IP 风控）")
             if r.status_code == 429:
                 if attempt == self.retries - 1:
                     return {"code": -429, "message": "rate limited", "data": None}
@@ -70,7 +88,7 @@ class Client:
 
             code = j.get("code")
             if code == -412:
-                raise Blocked("-412，请求被拦截（出口 IP 风控）")
+                raise Blocked("code -412（已带 buvid3 仍被拦，判断为出口 IP 风控）")
             if code == 0:
                 return j
             if code in SKIP_CODES:
