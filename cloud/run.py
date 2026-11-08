@@ -200,6 +200,11 @@ def main():
     lo, hi = (float(x) for x in args.delay.split(","))
     client = bili.Client(delay=(lo, hi))
 
+    # dry-run（--limit）的产物放进 out/dryrun/：pull-cloud 只扫 out/*.json，
+    # 子目录不会被合并。否则试跑会造出一个只有几十条的假批次，污染时间序列。
+    if args.limit:
+        args.out = os.path.join(args.out, "dryrun")
+
     try:
         result = run_snapshot(client, args, batch) if args.mode == "snapshot" \
             else run_expand(client, args, batch)
