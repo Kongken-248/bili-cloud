@@ -1,0 +1,27 @@
+{
+ "A_裸请求_无buvid3": {
+  "status": 412,
+  "code": null,
+  "text": "<!DOCTYPE html> <html lang=\"zh-cn\">  <head>     <meta http-equiv=\"Access-Control-Allow-Origin\" content=\"*\" />     <meta http-equiv=\"Page-Enter\" content=\"blendTr"
+ },
+ "B_spi接口": {
+  "status": 200,
+  "code": 0,
+  "message": "ok",
+  "text": "{\"code\":0,\"data\":{\"b_3\":\"5769592D-59B1-66BA-C357-42D0B4EA463C77503infoc\",\"b_4\":\"3DD50736-BF3A-2483-59DC-3C09F2D7BF6D77503-026110900-iUT9X6UIrjPI6cD4Bolcsw==\"},\""
+ },
+ "B_buvid3": "5769592D-59B1-66BA-C357-42D0B4EA463C77503infoc",
+ "C_带buvid3_view": {
+  "status": 200,
+  "code": -404,
+  "message": "啥都木有",
+  "text": "{\"code\":-404,\"message\":\"啥都木有\",\"ttl\":1}"
+ },
+ "D_带buvid3_newlist": {
+  "status": 200,
+  "code": 0,
+  "message": "OK",
+  "text": "{\"code\":0,\"message\":\"OK\",\"ttl\":1,\"data\":{\"archives\":[{\"aid\":117581675500017,\"videos\":3,\"tid\":27,\"tname\":\"综合\",\"copyright\":3,\"pic\":\"http://i2.hdslb.com/bfs/archiv"
+ },
+ "_出口IP": "52.188.87.19"
+}
