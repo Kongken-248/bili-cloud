@@ -1,0 +1,32 @@
+name: diag
+
+# 一次性诊断：确认 GitHub Actions 出口访问 B 站是"IP 被拦"还是"缺 buvid3"。
+# 结果写入 diag.json 并提交回仓库 —— 因为沙箱不能下载 job 日志，只能这样读。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+
+      - name: probe
+        run: python cloud/_diag.py
+
+      - name: commit
+        if: always()
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "diag: 探测结果 [skip ci]" || echo "无变化"
+          git push
