@@ -2,11 +2,12 @@ name: bili-cloud
 
 # 云端只做两件事：全库数值快照 + newlist 扩样（新视频仅元数据）。
 # 不采弹幕正文、不采评论正文 —— 那两个需要登录态，留在本地。
+#
+# 定时触发（2026-11-10 起）：外部定时服务 cron-job.org 准点调用 workflow_dispatch
+# API 拉起本 workflow，是唯一定时主路径。GitHub 原生 schedule 已于同日退役：
+# 两天内 5 个定时点全部静默未触发（独立探针对照实验已排除本仓库配置问题，
+# 定论为 GitHub 平台调度器不可靠），证据链见《GitHub_Actions部署操作手册》。
 on:
-  schedule:
-    - cron: '45 0,12 * * *'     # 00:45 / 12:45 UTC = 北京 08:45 / 20:45 触发。GitHub schedule
-                                 # 不保证整点（实测可延迟 30 分钟以上），提前预留排队缓冲，
-                                 # 实际约 9 点 / 21 点档；批次标签始终取实际运行时刻
   push:
     branches: [main]            # 推送即跑（测试 / 清单更新后）；产出 commit 带 [skip ci] 防自触发
   workflow_dispatch:

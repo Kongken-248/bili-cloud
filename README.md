@@ -18,7 +18,9 @@
 ## 数据流
 
 ```
-GitHub Actions（00:45 / 12:45 UTC = 北京 08:45 / 20:45 触发，预留 GitHub 队列延迟缓冲，实际约 9 点 / 21 点档；批次标签始终取实际运行时刻）
+GitHub Actions（外部定时服务 cron-job.org 准点调 workflow_dispatch API 触发，每日早晚各一轮；
+2026-11-10 起为唯一定时路径，GitHub 原生 schedule 已退役——实测两天 5 个定时点全部静默未触发；
+批次标签始终取实际运行时刻）
   ├─ prep    生成统一批次标签（4 个分片必须共用同一个，否则一轮会变成 4 个假批次）
   ├─ snap    4 分片并行，每片约 1/4 清单，间隔 1.2~2.2s
   ├─ expand  12 区 newlist，新视频补元数据（本地不再重复干这件事）
@@ -36,8 +38,18 @@ GitHub Actions（00:45 / 12:45 UTC = 北京 08:45 / 20:45 触发，预留 GitHub
 ## 部署状态：已上线（2026-11-08）
 
 仓库 <https://github.com/Kongken-248/bili-cloud> 已是公开仓库，`main` 已推上去，
-`permissions: contents: write` 写在 workflow 里（无需去 Settings 手工开权限），
-定时 `45 0,12 * * *` 已生效（11-09 由 `0 1,13` 提前 15 分钟留缓冲），无需再做任何配置。
+`permissions: contents: write` 写在 workflow 里（无需去 Settings 手工开权限）。
+
+### 定时触发：cron-job.org（2026-11-10 起唯一主路径）
+
+GitHub 原生 `schedule` 已退役（实测系统性不触发，详见《GitHub_Actions部署操作手册》），
+定时由外部服务 cron-job.org 调 API 拉起：
+
+- **请求**：`POST https://api.github.com/repos/Kongken-248/bili-cloud/actions/workflows/bili.yml/dispatches`
+  - Header：`Authorization: Bearer <PAT>`（fine-grained PAT，仅需本仓库 Actions 写权限）
+  - Body：`{"ref": "main"}`
+- **日档时间**：在 cron-job.org 控制台配置（每日早晚各一轮），改时间也在控制台改，不动仓库
+- **安全**：PAT 只存在 cron-job.org，绝不提交进仓库；2026-11-10 已实测触发成功
 
 要重建一份同样的仓库，按下表照做即可：
 
@@ -142,7 +154,7 @@ cloud/run.py               snapshot / expand 两个入口
 data/bvids.json            已知视频清单（本地 export-cloud 生成）
 out/                       云端产出（本地 pull-cloud 消费）
 samples/                   试跑样例，仅供参考
-.github/workflows/bili.yml 定时与分片编排
+.github/workflows/bili.yml 触发与分片编排（由 cron-job.org 外部定时拉起）
 ```
 
 ## 参数
