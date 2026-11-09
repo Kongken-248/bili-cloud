@@ -4,7 +4,6 @@ name: bili-cloud
 # 不采弹幕正文、不采评论正文 —— 那两个需要登录态，留在本地。
 on:
   schedule:
-    - cron: '20 15 9 11 *'      # 临时·一次性测试：2026-11-09 23:20 北京，验证 schedule 能否触发，测完删除
     - cron: '45 0,12 * * *'     # 00:45 / 12:45 UTC = 北京 08:45 / 20:45 触发。GitHub schedule
                                  # 不保证整点（实测可延迟 30 分钟以上），提前预留排队缓冲，
                                  # 实际约 9 点 / 21 点档；批次标签始终取实际运行时刻
@@ -133,7 +132,26 @@ jobs:
           fi
           # [skip ci] 防自触发：本 workflow 有 push 触发，产出 commit 若再触发会死循环
           git commit -m "cloud $(TZ=Asia/Shanghai date '+%F %T') [skip ci]"
-          git pull --rebase
+          if git push; then exit 0; fi
+          # 推送被拒 = 采集运行期间有人向 main 推过提交（2026-11-09 实际发生过，导致整轮数据丢失）。
+          # 恢复办法：重置到最新远端，重放本轮产物。out/*.json 文件名含批次时间戳，天然不冲突；
+          # bvids.json 是追加型清单，与远端求并集后重新提交。
+          git fetch origin main
+          rm -rf /tmp/keep && mkdir -p /tmp/keep
+          cp -r out /tmp/keep/out
+          cp data/bvids.json /tmp/keep/bvids.json
+          git reset --hard origin/main
+          mkdir -p out && cp -r /tmp/keep/out/. out/
+          python - <<'PY'
+          import json
+          remote = json.load(open('data/bvids.json'))
+          ours   = json.load(open('/tmp/keep/bvids.json'))
+          merged = sorted(set(remote) | set(ours))
+          json.dump(merged, open('data/bvids.json', 'w'), ensure_ascii=False, indent=0)
+          print(f"bvids 并集合并: 远端 {len(remote)} + 本轮 {len(ours)} -> {len(merged)}")
+          PY
+          git add -A
+          git commit -m "cloud $(TZ=Asia/Shanghai date '+%F %T') [skip ci]"
           git push
 
       - name: summary
