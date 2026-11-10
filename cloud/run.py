@@ -1,9 +1,16 @@
-"""云端采集入口：只做两件事 —— 快照（数值）与扩样（新视频元数据）。
+"""云端采集入口：只做两件事 —— 快照（数值）与扩样（新视频发现）。
 
 不做的事（有意为之）：
   * 不采弹幕正文（seg.so）
   * 不采评论正文（reply/wbi/main 需要 SESSDATA）
   * 不写数据库 —— 只产出 JSON，由本地 `crawler.py pull-cloud` 合并
+
+扩样口径（2026-11-10 起，用户拍板"只发现不跟踪"）：
+  * 新视频记录完整基本数据：分区（rid/tid/tname）、标题/时长/发布时间/UP 主、
+    标签、粉丝数、发现时的首次计数 —— 支撑"每天新增视频数（按分区）"看板指标
+  * 但**不追加进跟踪清单 bvids.json**：名单固定，快照轮时长稳定不超时
+  * 防重复靠发现登记簿 discovered.json：见过的视频下轮不再当新视频重复采，
+    否则"每天新增数"会重复计数、expand 请求量也会翻倍
 
 用法：
   python cloud/run.py --mode snapshot --shard 0 --total 4 --tag "2026-11-08 15:00"
@@ -121,7 +128,8 @@ def run_snapshot(client, args, batch):
 
 
 def run_expand(client, args, batch):
-    known = set(load_bvids(args.data))
+    # 防重集合 = 跟踪清单 + 发现登记簿。扩样只对两者都没见过的视频取详情。
+    known = set(load_bvids(args.data)) | set(load_bvids(args.discovered))
     print(f"[expand] 批次 {batch} 已知 {len(known)} 个，开始扫描 12 区 newlist")
 
     seen, candidates = set(), []
@@ -187,6 +195,8 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="只跑前 N 个，dry-run 用")
     ap.add_argument("--tag", default="", help="批次标签，留空取北京时间当前分钟")
     ap.add_argument("--data", default="data/bvids.json")
+    ap.add_argument("--discovered", default="data/discovered.json",
+                    help="发现登记簿：见过的视频不再算新增（不进跟踪清单）")
     ap.add_argument("--out", default="out")
     ap.add_argument("--delay", default="1.2,2.2", help="请求间隔区间，单位秒")
     args = ap.parse_args()
@@ -231,16 +241,14 @@ def main():
         json.dump(payload, f, ensure_ascii=False, indent=1)
     print(f"[写入] {path}")
 
-    # 扩样的成果要回写已知清单，否则下一轮会重复采同一批
+    # 扩样只发现不跟踪（2026-11-10 起）：新视频的基本数据（含分区）写进产物由本地
+    # 合并，bvid 只登记进 discovered.json 防下轮重复，跟踪清单 bvids.json 保持不变。
     if args.mode == "expand" and result["videos"]:
-        save_bvids(args.data, list(known_all(result, args.data)))
-        print(f"[清单] {args.data} 已更新")
-
-
-def known_all(result, data_path):
-    cur = set(load_bvids(data_path))
-    cur.update(v["bvid"] for v in result["videos"])
-    return cur
+        seen_before = set(load_bvids(args.discovered))
+        fresh = {v["bvid"] for v in result["videos"]} - seen_before
+        save_bvids(args.discovered, sorted(seen_before | fresh))
+        print(f"[登记簿] {args.discovered} +{len(fresh)}，累计 {len(seen_before) + len(fresh)}"
+              f"（跟踪清单不变，仍为 {len(load_bvids(args.data))} 个）")
 
 
 if __name__ == "__main__":

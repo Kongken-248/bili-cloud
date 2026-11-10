@@ -71,6 +71,8 @@ jobs:
     needs: prep
     if: ${{ github.event.inputs.mode != 'snapshot' }}
     runs-on: ubuntu-latest
+    # 扩样已降级为"只发现不跟踪"（2026-11-10）：新视频只记分区+元数据+首次计数，
+    # 不追加进跟踪清单。防重复靠 data/discovered.json 发现登记簿。
     # 实测 25.2 分钟（256 个新视频 × 3 请求 + 24 次 newlist）。原来是 30 分钟，
     # 余量只剩 5 分钟，新视频一多就会踩线，放宽到 45。
     timeout-minutes: 45
@@ -95,7 +97,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bvids
-          path: data/bvids.json
+          path: data/*.json          # bvids.json（固定跟踪面板）+ discovered.json（发现登记簿）
           if-no-files-found: error
 
   commit:

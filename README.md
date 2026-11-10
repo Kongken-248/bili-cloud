@@ -4,8 +4,8 @@
 
 | 模式 | 做什么 | 每轮请求量 |
 |---|---|---|
-| `snapshot` | 对已知视频清单逐个取 `view`，存 9 项计数 | 视频数 × 1 |
-| `expand` | 扫 12 区 `newlist`，新视频取 `view`+`tags`+`card` | 24 + 新视频数 × 3 |
+| `snapshot` | 对跟踪清单逐个取 `view`，存 9 项计数 | 视频数 × 1 |
+| `expand` | 扫 12 区 `newlist`，**发现**新视频：分区+元数据+标签+UP主+首次计数（只发现不跟踪，2026-11-10 起） | 24 + 新视频数 × 3 |
 
 **有意不做**：弹幕正文（`seg.so`）、评论正文（`reply/wbi/main` 需要 SESSDATA 才能翻页）。
 这两样永远留在本地 `bili-crawler-v2`，云端零账号风险。
@@ -22,16 +22,18 @@ GitHub Actions（外部定时服务 cron-job.org 准点调 workflow_dispatch API
 2026-11-10 起为唯一定时路径，GitHub 原生 schedule 已退役——实测两天 5 个定时点全部静默未触发；
 批次标签始终取实际运行时刻）
   ├─ prep    生成统一批次标签（4 个分片必须共用同一个，否则一轮会变成 4 个假批次）
-  ├─ snap    4 分片并行，每片约 1/4 清单，间隔 1.2~2.2s
-  ├─ expand  12 区 newlist，新视频补元数据（本地不再重复干这件事）
-  └─ commit  汇总 artifact → git commit 回 out/ 与 data/bvids.json
+  ├─ snap    4 分片并行，每片约 1/4 跟踪清单，间隔 1.2~2.2s
+  ├─ expand  12 区 newlist，发现新视频（分区+元数据+首次计数，只登记不跟踪）
+  └─ commit  汇总 artifact → git commit 回 out/ 与 data/discovered.json
         ↓  git pull
 本地  python crawler.py pull-cloud --dir ../cloud-snapshot/out
         ↓  按 (bvid, collect_time) 去重写入
       bili.db
 ```
 
-云端**永远拿不到** 491MB 的库，也不需要它——只需要 `data/bvids.json`（2042 个 bvid，34KB）。
+云端**永远拿不到** 491MB 的库，也不需要它——只需要两份小文件：
+`data/bvids.json`（**固定跟踪面板**，3,290 个，2026-11-10 冻结，快照轮时长因此稳定）和
+`data/discovered.json`（**发现登记簿**：见过的视频不再算新增，防重复计数）。
 
 ---
 
@@ -97,15 +99,16 @@ cd ..\cloud-snapshot && git pull && cd ..\bili-crawler-v2
 python crawler.py pull-cloud --dir ..\cloud-snapshot\out
 ```
 
-本地新增了视频后，要把清单同步回云端，否则云端不知道它们：
+清单是**固定跟踪面板**（3,290 个，2026-11-10 起冻结）。本地补采过正文的视频想纳入跟踪时，
+才需要把清单同步回云端：
 
 ```
 python crawler.py export-cloud
 cd ..\cloud-snapshot && git add data/bvids.json && git commit -m "sync bvids" && git push
 ```
 
-第 3 步只在**本地新增了视频**时才需要。顺序必须是"先 pull-cloud 再 export-cloud"，
-否则云端刚发现的新视频会被本地清单覆盖掉。
+`export-cloud` 会自动取"远端清单 ∪ 本地清单 ∪ 已采正文的视频"，清单永不缩水；
+纯发现型新视频（meta_only、未采正文）不会混入。顺序仍要求"先 pull-cloud 再 export-cloud"。
 
 ---
 
@@ -150,8 +153,9 @@ SELECT COUNT(*) FROM fetch_log WHERE status='meta_only';
 
 ```
 cloud/bili.py              无 cookie 客户端（限速/退避/412 熔断）
-cloud/run.py               snapshot / expand 两个入口
-data/bvids.json            已知视频清单（本地 export-cloud 生成）
+cloud/run.py               snapshot / expand 两个入口（expand 只发现不跟踪）
+data/bvids.json            固定跟踪面板（3,290 个，本地 export-cloud 维护）
+data/discovered.json       发现登记簿（云端每轮追加，防重复计数）
 out/                       云端产出（本地 pull-cloud 消费）
 samples/                   试跑样例，仅供参考
 .github/workflows/bili.yml 触发与分片编排（由 cron-job.org 外部定时拉起）
@@ -175,5 +179,5 @@ samples/                   试跑样例，仅供参考
 | commit | 0.1 分钟 | |
 | 整轮 | **25.5 分钟** | 快照与扩样并行，取较慢者 |
 
-清单从 2,042 涨到 3,750 时，每片约 937 个 ≈ 27 分钟，仍在 `snap` 的 45 分钟超时内；
-`expand` 的耗时取决于**当轮新视频数**（越往后越少），已把它的超时从 30 提到 45 分钟。
+清单固定在 3,290 后每片约 823 个 ≈ 23 分钟，稳定在 `snap` 的 45 分钟超时内；
+`expand` 的耗时取决于**当轮真正的新视频数**（发现登记簿防重后大幅减少），45 分钟超时余量充足。
